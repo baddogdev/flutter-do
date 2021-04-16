@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app_upgrade/flutter_app_upgrade.dart';
@@ -65,28 +66,33 @@ class AppUpgrade {
     VoidCallback onOk,
     DownloadProgressCallback downloadProgress,
     DownloadStatusChangeCallback downloadStatusChange,
+    Dio dio,
   }) {
     future.then((AppUpgradeInfo appUpgradeInfo) {
       if (appUpgradeInfo != null && appUpgradeInfo.title != null) {
         _showUpgradeDialog(
-            context, appUpgradeInfo.title, appUpgradeInfo.contents,
-            apkDownloadUrl: appUpgradeInfo.apkDownloadUrl,
-            force: appUpgradeInfo.force,
-            titleStyle: titleStyle,
-            contentStyle: contentStyle,
-            cancelText: cancelText,
-            cancelTextStyle: cancelTextStyle,
-            okBackgroundColors: okBackgroundColors,
-            okText: okText,
-            okTextStyle: okTextStyle,
-            borderRadius: borderRadius,
-            progressBarColor: progressBarColor,
-            iosAppId: iosAppId,
-            appMarketInfo: appMarketInfo,
-            onCancel: onCancel,
-            onOk: onOk,
-            downloadProgress: downloadProgress,
-            downloadStatusChange: downloadStatusChange);
+          context,
+          appUpgradeInfo.title,
+          appUpgradeInfo.contents,
+          apkDownloadUrl: appUpgradeInfo.apkDownloadUrl,
+          force: appUpgradeInfo.force,
+          titleStyle: titleStyle,
+          contentStyle: contentStyle,
+          cancelText: cancelText,
+          cancelTextStyle: cancelTextStyle,
+          okBackgroundColors: okBackgroundColors,
+          okText: okText,
+          okTextStyle: okTextStyle,
+          borderRadius: borderRadius,
+          progressBarColor: progressBarColor,
+          iosAppId: iosAppId,
+          appMarketInfo: appMarketInfo,
+          onCancel: onCancel,
+          onOk: onOk,
+          downloadProgress: downloadProgress,
+          downloadStatusChange: downloadStatusChange,
+          dio: dio,
+        );
       }
     }).catchError((onError) {
       print('$onError');
@@ -117,6 +123,7 @@ class AppUpgrade {
     VoidCallback onOk,
     DownloadProgressCallback downloadProgress,
     DownloadStatusChangeCallback downloadStatusChange,
+    Dio dio,
   }) {
     showDialog(
         context: context,
@@ -128,8 +135,7 @@ class AppUpgrade {
             },
             child: Dialog(
                 shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(borderRadius))),
+                    borderRadius: BorderRadius.all(Radius.circular(borderRadius))),
                 child: SimpleAppUpgradeWidget(
                   title: title,
                   titleStyle: titleStyle,
@@ -142,7 +148,7 @@ class AppUpgrade {
                   okBackgroundColors: okBackgroundColors ??
                       [
                         Theme.of(context).primaryColor,
-                        Theme.of(context).primaryColor
+                        Theme.of(context).primaryColor,
                       ],
                   progressBarColor: progressBarColor,
                   borderRadius: borderRadius,
@@ -150,10 +156,11 @@ class AppUpgrade {
                   force: force,
                   iosAppId: iosAppId,
                   appMarketInfo: appMarketInfo,
-                    onCancel: onCancel,
-                    onOk: onOk,
-                    downloadProgress: downloadProgress,
-                    downloadStatusChange: downloadStatusChange
+                  onCancel: onCancel,
+                  onOk: onOk,
+                  downloadProgress: downloadProgress,
+                  downloadStatusChange: downloadStatusChange,
+                  dio: dio,
                 )),
           );
         });
@@ -170,10 +177,7 @@ class AppInfo {
 
 class AppUpgradeInfo {
   AppUpgradeInfo(
-      {@required this.title,
-      @required this.contents,
-      this.apkDownloadUrl,
-      this.force = false});
+      {@required this.title, @required this.contents, this.apkDownloadUrl, this.force = false});
 
   ///
   /// title,显示在提示框顶部
@@ -204,5 +208,4 @@ typedef DownloadProgressCallback = Function(int count, int total);
 ///
 /// 下载状态变化回调
 ///
-typedef DownloadStatusChangeCallback = Function(DownloadStatus downloadStatus,
-    {dynamic error});
+typedef DownloadStatusChangeCallback = Function(DownloadStatus downloadStatus, {dynamic error});

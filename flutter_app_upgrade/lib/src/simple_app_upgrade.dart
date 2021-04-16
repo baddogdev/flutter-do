@@ -31,7 +31,8 @@ class SimpleAppUpgradeWidget extends StatefulWidget {
       this.onCancel,
       this.onOk,
       this.downloadProgress,
-      this.downloadStatusChange});
+      this.downloadStatusChange,
+      this.dio});
 
   ///
   /// 升级标题
@@ -119,6 +120,8 @@ class SimpleAppUpgradeWidget extends StatefulWidget {
   final DownloadProgressCallback downloadProgress;
   final DownloadStatusChangeCallback downloadStatusChange;
 
+  final Dio dio;
+
   @override
   State<StatefulWidget> createState() => _SimpleAppUpgradeWidget();
 }
@@ -174,8 +177,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   _buildTitle() {
     return Padding(
         padding: EdgeInsets.only(top: 20, bottom: 30),
-        child: Text(widget.title ?? '',
-            style: widget.titleStyle ?? TextStyle(fontSize: 22)));
+        child: Text(widget.title ?? '', style: widget.titleStyle ?? TextStyle(fontSize: 22)));
   }
 
   ///
@@ -227,16 +229,13 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   _buildCancelActionButton() {
     return Ink(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(widget.borderRadius))),
+          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(widget.borderRadius))),
       child: InkWell(
-          borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(widget.borderRadius)),
+          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(widget.borderRadius)),
           child: Container(
             height: 45,
             alignment: Alignment.center,
-            child: Text(widget.cancelText ?? '以后再说',
-                style: widget.cancelTextStyle ?? TextStyle()),
+            child: Text(widget.cancelText ?? '以后再说', style: widget.cancelTextStyle ?? TextStyle()),
           ),
           onTap: () {
             widget.onCancel?.call();
@@ -249,20 +248,15 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   /// 确定按钮
   ///
   _buildOkActionButton() {
-    var borderRadius =
-        BorderRadius.only(bottomRight: Radius.circular(widget.borderRadius));
+    var borderRadius = BorderRadius.only(bottomRight: Radius.circular(widget.borderRadius));
     if (widget.force) {
       borderRadius = BorderRadius.only(
           bottomRight: Radius.circular(widget.borderRadius),
           bottomLeft: Radius.circular(widget.borderRadius));
     }
     var _okBackgroundColors = widget.okBackgroundColors;
-    if (widget.okBackgroundColors == null ||
-        widget.okBackgroundColors.length != 2) {
-      _okBackgroundColors = [
-        Theme.of(context).primaryColor,
-        Theme.of(context).primaryColor
-      ];
+    if (widget.okBackgroundColors == null || widget.okBackgroundColors.length != 2) {
+      _okBackgroundColors = [Theme.of(context).primaryColor, Theme.of(context).primaryColor];
     }
     return Ink(
       decoration: BoxDecoration(
@@ -294,8 +288,8 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
         LiquidLinearProgressIndicator(
           value: _downloadProgress,
           direction: Axis.vertical,
-          valueColor: AlwaysStoppedAnimation(widget.progressBarColor ??
-              Theme.of(context).primaryColor.withOpacity(0.4)),
+          valueColor: AlwaysStoppedAnimation(
+              widget.progressBarColor ?? Theme.of(context).primaryColor.withOpacity(0.4)),
           borderRadius: widget.borderRadius,
         );
   }
@@ -332,8 +326,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
 
     _updateDownloadStatus(DownloadStatus.start);
     try {
-      var dio = Dio();
-      await dio.download(url, path, onReceiveProgress: (int count, int total) {
+      await widget.dio.download(url, path, onReceiveProgress: (int count, int total) {
         if (total == -1) {
           _downloadProgress = 0.01;
         } else {
@@ -341,7 +334,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
           _downloadProgress = count / total.toDouble();
         }
         setState(() {});
-        if (_downloadProgress == 1) {
+        if (count == total) {
           //下载完成，跳转到程序安装界面
           _updateDownloadStatus(DownloadStatus.done);
           Navigator.pop(context);
@@ -351,7 +344,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
     } catch (e) {
       print('$e');
       _downloadProgress = 0;
-      _updateDownloadStatus(DownloadStatus.error,error: e);
+      _updateDownloadStatus(DownloadStatus.error, error: e);
     }
   }
 
