@@ -50,7 +50,7 @@ class AppUpgrade {
   ///
   static appUpgrade(
     BuildContext context,
-    Future<AppUpgradeInfo> future, {
+    Future<AppUpgradeInfo>? future, {
     TextStyle? titleStyle,
     TextStyle? contentStyle,
     String? cancelText,
@@ -68,6 +68,10 @@ class AppUpgrade {
     DownloadStatusChangeCallback? downloadStatusChange,
     Dio? dio,
   }) {
+    if (future == null) {
+      return;
+    }
+
     future.then((AppUpgradeInfo appUpgradeInfo) {
       _showUpgradeDialog(
         context,
