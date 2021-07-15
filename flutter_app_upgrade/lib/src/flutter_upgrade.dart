@@ -35,7 +35,11 @@ class FlutterUpgrade {
   ///
   /// 跳转到ios app store
   ///
-  static toAppStore(String id) async {
+  static toAppStore(String? id) async {
+    if (id == null) {
+      return;
+    }
+
     var map = {'id': id};
     return await _channel.invokeMethod('toAppStore', map);
   }
@@ -43,7 +47,7 @@ class FlutterUpgrade {
   ///
   /// 获取android手机上安装的应用商店
   ///
-  static getInstallMarket({List<String> marketPackageNames}) async {
+  static getInstallMarket({List<String>? marketPackageNames}) async {
     List<String> packageNameList = AppMarket.buildInPackageNameList;
     if (marketPackageNames != null && marketPackageNames.length > 0) {
       packageNameList.addAll(marketPackageNames);
@@ -59,10 +63,9 @@ class FlutterUpgrade {
   ///
   /// 跳转到应用商店
   ///
-  static toMarket({AppMarketInfo appMarketInfo}) async {
+  static toMarket({AppMarketInfo? appMarketInfo}) async {
     var map = {
-      'marketPackageName':
-          appMarketInfo != null ? appMarketInfo.packageName : '',
+      'marketPackageName': appMarketInfo != null ? appMarketInfo.packageName : '',
       'marketClassName': appMarketInfo != null ? appMarketInfo.className : ''
     };
     return await _channel.invokeMethod('toMarket', map);
