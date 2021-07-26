@@ -55,10 +55,12 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  _checkAppUpgrade() {
+  _checkAppUpgrade() async {
+    var appUpgradeInfo = await _checkAppInfo();
+
     AppUpgrade.appUpgrade(
       context,
-      _checkAppInfo(),
+      appUpgradeInfo,
       cancelText: '以后再说',
       okText: '马上升级',
       iosAppId: 'id88888888',

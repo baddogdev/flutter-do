@@ -50,7 +50,7 @@ class AppUpgrade {
   ///
   static appUpgrade(
     BuildContext context,
-    Future<AppUpgradeInfo?> future, {
+    AppUpgradeInfo? appUpgradeInfo, {
     TextStyle? titleStyle,
     TextStyle? contentStyle,
     String? cancelText,
@@ -68,38 +68,33 @@ class AppUpgrade {
     DownloadStatusChangeCallback? downloadStatusChange,
     Dio? dio,
   }) {
-    future.then((AppUpgradeInfo? appUpgradeInfo) {
-      if (appUpgradeInfo == null) {
-        // 不需要升级
-        return;
-      }
+    if (appUpgradeInfo == null) {
+      return;
+    }
 
-      _showUpgradeDialog(
-        context,
-        appUpgradeInfo.title,
-        appUpgradeInfo.contents,
-        apkDownloadUrl: appUpgradeInfo.apkDownloadUrl,
-        force: appUpgradeInfo.force,
-        titleStyle: titleStyle,
-        contentStyle: contentStyle,
-        cancelText: cancelText,
-        cancelTextStyle: cancelTextStyle,
-        okBackgroundColors: okBackgroundColors,
-        okText: okText,
-        okTextStyle: okTextStyle,
-        borderRadius: borderRadius,
-        progressBarColor: progressBarColor,
-        iosAppId: iosAppId,
-        appMarketInfo: appMarketInfo,
-        onCancel: onCancel,
-        onOk: onOk,
-        downloadProgress: downloadProgress,
-        downloadStatusChange: downloadStatusChange,
-        dio: dio,
-      );
-    }).catchError((onError) {
-      print('$onError');
-    });
+    _showUpgradeDialog(
+      context,
+      appUpgradeInfo.title,
+      appUpgradeInfo.contents,
+      apkDownloadUrl: appUpgradeInfo.apkDownloadUrl,
+      force: appUpgradeInfo.force,
+      titleStyle: titleStyle,
+      contentStyle: contentStyle,
+      cancelText: cancelText,
+      cancelTextStyle: cancelTextStyle,
+      okBackgroundColors: okBackgroundColors,
+      okText: okText,
+      okTextStyle: okTextStyle,
+      borderRadius: borderRadius,
+      progressBarColor: progressBarColor,
+      iosAppId: iosAppId,
+      appMarketInfo: appMarketInfo,
+      onCancel: onCancel,
+      onOk: onOk,
+      downloadProgress: downloadProgress,
+      downloadStatusChange: downloadStatusChange,
+      dio: dio,
+    );
   }
 
   ///
