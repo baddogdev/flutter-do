@@ -32,6 +32,7 @@ class SimpleAppUpgradeWidget extends StatefulWidget {
     this.onOk,
     this.downloadProgress,
     this.downloadStatusChange,
+    required this.dio,
   });
 
   ///
@@ -119,6 +120,8 @@ class SimpleAppUpgradeWidget extends StatefulWidget {
   final VoidCallback? onOk;
   final DownloadProgressCallback? downloadProgress;
   final DownloadStatusChangeCallback? downloadStatusChange;
+
+  final Dio dio;
 
   @override
   State<StatefulWidget> createState() => _SimpleAppUpgradeWidget();
@@ -327,15 +330,8 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
     }
 
     _updateDownloadStatus(DownloadStatus.start);
-
-    Dio dio = new Dio(BaseOptions(
-      connectTimeout: 20 * 1000,
-      receiveTimeout: 20 * 1000,
-      sendTimeout: 20 * 1000,
-    ));
-
     try {
-      await dio.download(url, path, onReceiveProgress: (int count, int total) {
+      await widget.dio.download(url, path, onReceiveProgress: (int count, int total) {
         if (total == -1) {
           _downloadProgress = 0.01;
         } else {
