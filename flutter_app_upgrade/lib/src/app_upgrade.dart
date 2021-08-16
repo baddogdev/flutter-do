@@ -66,7 +66,6 @@ class AppUpgrade {
     VoidCallback? onOk,
     DownloadProgressCallback? downloadProgress,
     DownloadStatusChangeCallback? downloadStatusChange,
-    Dio? dio,
   }) {
     if (appUpgradeInfo == null) {
       return;
@@ -93,7 +92,6 @@ class AppUpgrade {
       onOk: onOk,
       downloadProgress: downloadProgress,
       downloadStatusChange: downloadStatusChange,
-      dio: dio,
     );
   }
 
@@ -121,7 +119,6 @@ class AppUpgrade {
     VoidCallback? onOk,
     DownloadProgressCallback? downloadProgress,
     DownloadStatusChangeCallback? downloadStatusChange,
-    Dio? dio,
   }) {
     showDialog(
         context: context,
@@ -155,8 +152,6 @@ class AppUpgrade {
                   onOk: onOk,
                   downloadProgress: downloadProgress,
                   downloadStatusChange: downloadStatusChange,
-                  dio: dio ??
-                      new Dio(BaseOptions(connectTimeout: 30 * 1000, receiveTimeout: 30 * 1000)),
                 )),
           );
         });
