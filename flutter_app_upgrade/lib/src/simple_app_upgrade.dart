@@ -134,6 +134,8 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   /// 下载进度
   ///
   double _downloadProgress = 0.0;
+  int _downloadCount = 0;
+  int _downloadTotal = 0;
 
   DownloadStatus _downloadStatus = DownloadStatus.none;
 
@@ -166,7 +168,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
           //更新信息
           _buildAppInfo(),
           //操作按钮
-          _buildAction()
+          _downloadStatus == DownloadStatus.none ? _buildAction() : _buildDownloadProgressText(),
         ],
       ),
     );
@@ -283,6 +285,34 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   }
 
   ///
+  /// 构建显示下载进度文本
+  ///
+  _buildDownloadProgressText() {
+    String c1 = (_downloadCount / 1048576.0).toStringAsFixed(2);
+    String c2 = (_downloadTotal / 1048576.0).toStringAsFixed(2);
+
+    return Column(
+      children: <Widget>[
+        Divider(
+          height: 1,
+          color: Colors.grey,
+        ),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                height: 45,
+                alignment: Alignment.center,
+                child: Text("${c1}MB/${c2}MB", style: TextStyle()),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  ///
   /// 下载进度widget
   ///
   Widget _buildDownloadProgress() {
@@ -332,17 +362,22 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
     Dio dio = widget.getDio?.call() ??
         new Dio(BaseOptions(
           connectTimeout: 30 * 1000,
-          receiveTimeout: 30 * 1000,
-          sendTimeout: 30 * 1000,
         ));
 
     _updateDownloadStatus(DownloadStatus.start);
+    // 先更新状态，有可能dio.download无法连接成功
+    setState(() {});
+
     try {
       await dio.download(url, path, onReceiveProgress: (int count, int total) {
         if (total == -1) {
           _downloadProgress = 0.01;
+          _downloadCount = 0;
+          _downloadTotal = 0;
         } else {
           widget.downloadProgress?.call(count, total);
+          _downloadCount = count;
+          _downloadTotal = total;
           _downloadProgress = count / total.toDouble();
         }
         setState(() {});
