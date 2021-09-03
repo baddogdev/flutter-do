@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -136,6 +137,8 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   double _downloadProgress = 0.0;
   int _downloadCount = 0;
   int _downloadTotal = 0;
+  int _lastDownloadCount = 0;
+  int _countPerSecond = 0;
 
   DownloadStatus _downloadStatus = DownloadStatus.none;
 
@@ -290,6 +293,9 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
   _buildDownloadProgressText() {
     String c1 = (_downloadCount / 1048576.0).toStringAsFixed(2);
     String c2 = (_downloadTotal / 1048576.0).toStringAsFixed(2);
+    String c3 = _countPerSecond >= 1048576
+        ? (_countPerSecond / 1048576.0).toStringAsFixed(2) + "MB/s"
+        : (_countPerSecond / 1024.0).toStringAsFixed(2) + "KB/s";
 
     return Column(
       children: <Widget>[
@@ -303,7 +309,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
               child: Container(
                 height: 45,
                 alignment: Alignment.center,
-                child: Text("${c1}MB/${c2}MB", style: TextStyle()),
+                child: Text("${c1}MB/${c2}MB  $c3", style: TextStyle()),
               ),
             ),
           ],
@@ -368,6 +374,18 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
     // 先更新状态，有可能dio.download无法连接成功
     setState(() {});
 
+    bool isDownloadStopped = false;
+
+    Timer countTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _countPerSecond = _downloadCount - _lastDownloadCount;
+      _lastDownloadCount = _downloadCount;
+
+      if (_countPerSecond == 0 && !isDownloadStopped) {
+        setState(() {});
+        isDownloadStopped = true;
+      }
+    });
+
     try {
       await dio.download(url, path, onReceiveProgress: (int count, int total) {
         if (total == -1) {
@@ -380,8 +398,12 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
           _downloadTotal = total;
           _downloadProgress = count / total.toDouble();
         }
+
+        isDownloadStopped = false;
         setState(() {});
+
         if (count == total) {
+          countTimer.cancel();
           //下载完成，跳转到程序安装界面
           _updateDownloadStatus(DownloadStatus.done);
           Navigator.pop(context);
@@ -389,7 +411,7 @@ class _SimpleAppUpgradeWidget extends State<SimpleAppUpgradeWidget> {
         }
       });
     } catch (e) {
-      print('$e');
+      countTimer.cancel();
       _downloadProgress = 0;
       _updateDownloadStatus(DownloadStatus.error, error: e);
     }
